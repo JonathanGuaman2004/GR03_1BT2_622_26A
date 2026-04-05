@@ -35,9 +35,17 @@
                         <td><c:out value="${tarea.titulo}"/></td>
                         <td><c:out value="${tarea.descripcion}"/></td>
                         <td>
-                                <span class="estado estado-${fn:replace(tarea.estado,' ','-')}">
-                                    <c:out value="${tarea.estado}"/>
-                                </span>
+                            <c:choose>
+                                <c:when test="${tarea.estado == 'Pendiente'}">
+                                    <span class="estado estado-pendiente"><c:out value="${tarea.estado}"/></span>
+                                </c:when>
+                                <c:when test="${tarea.estado == 'En Progreso'}">
+                                    <span class="estado estado-progreso"><c:out value="${tarea.estado}"/></span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="estado estado-completada"><c:out value="${tarea.estado}"/></span>
+                                </c:otherwise>
+                            </c:choose>
                         </td>
                         <td class="acciones">
                             <a class="btn btn-sm btn-editar"

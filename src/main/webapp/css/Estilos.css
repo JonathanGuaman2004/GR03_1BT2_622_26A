@@ -85,9 +85,9 @@ tr:hover { background: #f5f9ff; }
     font-size: .82rem;
     font-weight: 600;
 }
-.estado-Pendiente    { background: #fef3cd; color: #856404; }
-.estado-En-Progreso  { background: #cfe2ff; color: #084298; }
-.estado-Completada   { background: #d1e7dd; color: #0f5132; }
+.estado-pendiente   { background: #fef3cd; color: #856404; }
+.estado-progreso    { background: #cfe2ff; color: #084298; }
+.estado-completada  { background: #d1e7dd; color: #0f5132; }
 
 /* ── Formularios ──────────────────────────────────────── */
 .form-group {
