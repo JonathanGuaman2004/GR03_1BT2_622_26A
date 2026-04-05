@@ -1,15 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>JSP - Hello World</title>
+    <meta charset="UTF-8">
+    <title>Sistema de Gestión de Tareas</title>
+    <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
-<h1><%= "Sistema Web de Gestión de Tareas" %>
-</h1>
-<br/>
-<a href="tareas?action=listar">Gestionar Tareas</a>
-<br/>
-<a href="hello-servlet">Hello Servlet</a>
+<div class="container">
+    <h1>Sistema Web de Gestión de Tareas</h1>
+    <p>Bienvenido. Usa el siguiente enlace para administrar tus tareas.</p>
+    <a class="btn" href="tareas?action=listar">Gestionar Tareas</a>
+</div>
 </body>
 </html>

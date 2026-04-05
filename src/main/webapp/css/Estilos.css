@@ -1,0 +1,129 @@
+/* ── Reset y base ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f5;
+    color: #333;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+/* ── Contenedor principal ─────────────────────────────── */
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.1);
+    padding: 2rem;
+}
+
+h1 {
+    font-size: 1.7rem;
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: .5rem;
+}
+
+/* ── Botones ──────────────────────────────────────────── */
+.btn {
+    display: inline-block;
+    padding: .5rem 1.2rem;
+    background: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: .95rem;
+    transition: background .2s;
+}
+.btn:hover { background: #2176ae; }
+
+.btn-sm  { padding: .3rem .8rem; font-size: .85rem; }
+
+.btn-editar   { background: #27ae60; }
+.btn-editar:hover { background: #1e8449; }
+
+.btn-eliminar { background: #e74c3c; }
+.btn-eliminar:hover { background: #c0392b; }
+
+.btn-cancelar { background: #95a5a6; margin-left: .5rem; }
+.btn-cancelar:hover { background: #7f8c8d; }
+
+/* ── Tabla ────────────────────────────────────────────── */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    font-size: .95rem;
+}
+
+th, td {
+    padding: .75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+th {
+    background: #2c3e50;
+    color: #fff;
+    font-weight: 600;
+}
+
+tr:hover { background: #f5f9ff; }
+
+.acciones { white-space: nowrap; }
+
+/* ── Badges de estado ─────────────────────────────────── */
+.estado {
+    display: inline-block;
+    padding: .2rem .7rem;
+    border-radius: 12px;
+    font-size: .82rem;
+    font-weight: 600;
+}
+.estado-Pendiente    { background: #fef3cd; color: #856404; }
+.estado-En-Progreso  { background: #cfe2ff; color: #084298; }
+.estado-Completada   { background: #d1e7dd; color: #0f5132; }
+
+/* ── Formularios ──────────────────────────────────────── */
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: .4rem;
+    color: #2c3e50;
+}
+
+input[type="text"],
+textarea,
+select {
+    width: 100%;
+    padding: .55rem .8rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: .95rem;
+    transition: border-color .2s;
+}
+
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52,152,219,.15);
+}
+
+textarea { resize: vertical; }
+
+.form-actions { margin-top: 1.5rem; }
+
+/* ── Mensajes informativos ────────────────────────────── */
+.info  { color: #555; margin-top: 1rem; font-style: italic; }
+.error { color: #c0392b; font-weight: 600; margin-top: 1rem; }

@@ -4,16 +4,35 @@
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
     <session-factory>
+        <!-- Dialecto para SQLite -->
         <property name="hibernate.dialect">org.hibernate.community.dialect.SQLiteDialect</property>
         <property name="hibernate.connection.driver_class">org.sqlite.JDBC</property>
-        <property name="hibernate.connection.url">jdbc:sqlite:C:/Users/jonat/OneDrive/Documents/IdeaProjects/GR03_1BT2_622_26A/db/tareas.db</property>
+
+        <!--
+            La URL real se inyecta en tiempo de ejecución por HibernateUtil
+            usando ServletContext.getRealPath(), que siempre devuelve la ruta
+            correcta sin importar dónde esté instalado Tomcat.
+            Este valor es solo un fallback y NO se usa directamente.
+        -->
+        <property name="hibernate.connection.url">jdbc:sqlite:tareas.db</property>
+
         <property name="hibernate.connection.username"></property>
         <property name="hibernate.connection.password"></property>
+
+        <!--
+            "update" crea la tabla si no existe y actualiza el esquema.
+            Cambia a "validate" en producción.
+        -->
         <property name="hibernate.hbm2ddl.auto">update</property>
+
+        <!-- Logs SQL — cambia a false en producción -->
         <property name="hibernate.show_sql">true</property>
-        <property name="hibernate.format_sql">true</property>
-        <property name="hibernate.use_sql_comments">true</property>
-        <property name="hibernate.generate_statistics">true</property>
+        <property name="hibernate.format_sql">false</property>
+
+        <!-- Pool mínimo de conexiones (C3P0 no está incluido; Hibernate usa pool básico) -->
+        <property name="hibernate.connection.pool_size">5</property>
+
+        <!-- Entidad mapeada -->
         <mapping class="com.webapp.gr03_1bt2_622_26a.Tarea"/>
     </session-factory>
 </hibernate-configuration>

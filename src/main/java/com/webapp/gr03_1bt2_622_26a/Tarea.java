@@ -5,53 +5,44 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "tareas")
 public class Tarea {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(nullable = false)
     private String titulo;
+
+    @Column(nullable = false)
     private String descripcion;
+
+    @Column(nullable = false)
     private String estado;
 
-    // Constructors
+    // Constructor vacío requerido por Hibernate
     public Tarea() {}
 
     public Tarea(String titulo, String descripcion, String estado) {
-        this.titulo = titulo;
+        this.titulo    = titulo;
         this.descripcion = descripcion;
-        this.estado = estado;
+        this.estado    = estado;
     }
 
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
+    // Getters y Setters
+    public int getId()                  { return id; }
+    public void setId(int id)           { this.id = id; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public String getTitulo()           { return titulo; }
+    public void setTitulo(String t)     { this.titulo = t; }
 
-    public String getTitulo() {
-        return titulo;
-    }
+    public String getDescripcion()      { return descripcion; }
+    public void setDescripcion(String d){ this.descripcion = d; }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
+    public String getEstado()           { return estado; }
+    public void setEstado(String e)     { this.estado = e; }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
+    @Override
+    public String toString() {
+        return "Tarea{id=" + id + ", titulo='" + titulo + "', estado='" + estado + "'}";
     }
 }

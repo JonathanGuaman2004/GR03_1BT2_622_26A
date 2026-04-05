@@ -1,168 +1,133 @@
 package com.webapp.gr03_1bt2_622_26a;
 
-import java.io.IOException;
-import java.util.List;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "TareaServlet", value = "/tareas")
+import java.io.IOException;
+import java.util.List;
+
+/**
+ * Capa de Control — maneja las acciones CRUD sobre Tarea.
+ * URL base: /tareas?action=...
+ */
+@WebServlet(name = "TareaServlet", urlPatterns = "/tareas")
 public class TareaServlet extends HttpServlet {
+
     private TareaDAO tareaDAO;
 
     @Override
     public void init() throws ServletException {
-        super.init();
-        try {
-            tareaDAO = new TareaDAO();
-        } catch (Exception e) {
-            System.err.println("Error inicializando TareaDAO en servlet: " + e.getMessage());
-            e.printStackTrace();
-            throw new ServletException("No se pudo inicializar TareaDAO", e);
-        }
+        tareaDAO = new TareaDAO();
     }
 
+    // ── GET: listar, mostrar formulario crear/editar, eliminar ───────────────
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String action = request.getParameter("action");
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+
+        String action = req.getParameter("action");
         if (action == null) action = "listar";
 
-        // Endpoint de prueba para verificar BD
-        if ("test".equals(action)) {
-            testDatabase(request, response);
+        switch (action) {
+            case "listar"  -> listar(req, res);
+            case "crear"   -> forward(req, res, "/crearTarea.jsp");
+            case "editar"  -> mostrarEditar(req, res);
+            case "eliminar"-> eliminar(req, res);
+            default        -> listar(req, res);
+        }
+    }
+
+    // ── POST: guardar nueva tarea o actualizar existente ─────────────────────
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+
+        req.setCharacterEncoding("UTF-8");
+        String action = req.getParameter("action");
+
+        switch (action != null ? action : "") {
+            case "guardar"    -> guardar(req, res);
+            case "actualizar" -> actualizar(req, res);
+            default           -> res.sendRedirect(req.getContextPath() + "/tareas?action=listar");
+        }
+    }
+
+    // ── Acciones privadas ─────────────────────────────────────────────────────
+
+    private void listar(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        List<Tarea> tareas = tareaDAO.listar();
+        req.setAttribute("tareas", tareas);
+        forward(req, res, "/listaTareas.jsp");
+    }
+
+    private void mostrarEditar(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        int id = parseId(req, res);
+        if (id < 0) return;                       // parseId ya envió el error
+
+        Tarea tarea = tareaDAO.obtenerPorId(id);
+        if (tarea == null) {
+            res.sendError(HttpServletResponse.SC_NOT_FOUND, "Tarea no encontrada (id=" + id + ")");
             return;
         }
-
-        switch (action) {
-            case "listar":
-                listarTareas(request, response);
-                break;
-            case "crear":
-                mostrarCrearTarea(request, response);
-                break;
-            case "editar":
-                mostrarEditarTarea(request, response);
-                break;
-            case "eliminar":
-                eliminarTarea(request, response);
-                break;
-            default:
-                listarTareas(request, response);
-        }
+        req.setAttribute("tarea", tarea);
+        forward(req, res, "/editarTarea.jsp");
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String action = request.getParameter("action");
+    private void guardar(HttpServletRequest req, HttpServletResponse res)
+            throws IOException {
+        String titulo      = req.getParameter("titulo");
+        String descripcion = req.getParameter("descripcion");
+        String estado      = req.getParameter("estado");
 
-        if ("guardar".equals(action)) {
-            guardarTarea(request, response);
-        } else if ("actualizar".equals(action)) {
-            actualizarTarea(request, response);
-        }
+        tareaDAO.guardar(new Tarea(titulo, descripcion, estado));
+        res.sendRedirect(req.getContextPath() + "/tareas?action=listar");
     }
 
-    private void listarTareas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Tarea> tareas = tareaDAO.listar();
-        request.setAttribute("tareas", tareas);
-        request.getRequestDispatcher("listaTareas.jsp").forward(request, response);
+    private void actualizar(HttpServletRequest req, HttpServletResponse res)
+            throws IOException {
+        int id = parseId(req, res);
+        if (id < 0) return;
+
+        String titulo      = req.getParameter("titulo");
+        String descripcion = req.getParameter("descripcion");
+        String estado      = req.getParameter("estado");
+
+        Tarea tarea = new Tarea(titulo, descripcion, estado);
+        tarea.setId(id);
+        tareaDAO.actualizar(tarea);
+        res.sendRedirect(req.getContextPath() + "/tareas?action=listar");
     }
 
-    private void mostrarCrearTarea(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("crearTarea.jsp").forward(request, response);
+    private void eliminar(HttpServletRequest req, HttpServletResponse res)
+            throws IOException {
+        int id = parseId(req, res);
+        if (id < 0) return;
+
+        tareaDAO.eliminar(id);
+        res.sendRedirect(req.getContextPath() + "/tareas?action=listar");
     }
 
-    private void mostrarEditarTarea(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    // ── Utilidades ────────────────────────────────────────────────────────────
+
+    /** Parsea el parámetro "id". Devuelve -1 y escribe 400 si falla. */
+    private int parseId(HttpServletRequest req, HttpServletResponse res)
+            throws IOException {
+        String param = req.getParameter("id");
         try {
-            String idParam = request.getParameter("id");
-            if (idParam != null) {
-                int id = Integer.parseInt(idParam);
-                Tarea tarea = tareaDAO.obtenerPorId(id);
-                request.setAttribute("tarea", tarea);
-            }
-            request.getRequestDispatcher("editarTarea.jsp").forward(request, response);
+            return Integer.parseInt(param);
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID inválido");
-        } catch (Exception e) {
-            System.err.println("Error al mostrar editar tarea: " + e.getMessage());
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al procesar la solicitud");
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID inválido: " + param);
+            return -1;
         }
     }
 
-    private void guardarTarea(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            String titulo = request.getParameter("titulo");
-            String descripcion = request.getParameter("descripcion");
-            String estado = request.getParameter("estado");
-            Tarea tarea = new Tarea(titulo, descripcion, estado);
-            tareaDAO.guardar(tarea);
-            response.sendRedirect("tareas?action=listar");
-        } catch (Exception e) {
-            System.err.println("Error al guardar tarea: " + e.getMessage());
-            e.printStackTrace();
-            try {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al guardar la tarea");
-            } catch (IllegalStateException ignored) {}
-        }
-    }
-
-    private void actualizarTarea(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            int id = Integer.parseInt(request.getParameter("id"));
-            String titulo = request.getParameter("titulo");
-            String descripcion = request.getParameter("descripcion");
-            String estado = request.getParameter("estado");
-            Tarea tarea = new Tarea(titulo, descripcion, estado);
-            tarea.setId(id);
-            tareaDAO.actualizar(tarea);
-            response.sendRedirect("tareas?action=listar");
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID inválido");
-        } catch (Exception e) {
-            System.err.println("Error al actualizar tarea: " + e.getMessage());
-            e.printStackTrace();
-            try {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al actualizar la tarea");
-            } catch (IllegalStateException ignored) {}
-        }
-    }
-
-    private void eliminarTarea(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            String idParam = request.getParameter("id");
-            if (idParam != null) {
-                int id = Integer.parseInt(idParam);
-                tareaDAO.eliminar(id);
-            }
-            response.sendRedirect("tareas?action=listar");
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID inválido");
-        } catch (Exception e) {
-            System.err.println("Error al eliminar tarea: " + e.getMessage());
-            e.printStackTrace();
-            try {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al eliminar la tarea");
-            } catch (IllegalStateException ignored) {}
-        }
-    }
-
-    private void testDatabase(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            // Lógica para probar la conexión a la base de datos
-            // Esto puede ser tan simple como intentar obtener una conexión y cerrarla,
-            // o una consulta más compleja dependiendo de lo que necesites verificar.
-
-            // Ejemplo simple:
-            tareaDAO.listar(); // Intenta listar tareas como prueba de conexión
-
-            response.getWriter().write("Conexión a la base de datos exitosa.");
-        } catch (Exception e) {
-            System.err.println("Error en la prueba de conexión a la base de datos: " + e.getMessage());
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error en la prueba de conexión a la base de datos");
-        }
+    private void forward(HttpServletRequest req, HttpServletResponse res, String jsp)
+            throws ServletException, IOException {
+        req.getRequestDispatcher(jsp).forward(req, res);
     }
 }
